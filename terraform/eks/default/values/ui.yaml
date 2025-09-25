@@ -1,31 +1,19 @@
 image:
-  repository: ${image_repository}
-  tag: ${image_tag}
+  repository: public.ecr.aws/aws-containers/retail-store-sample-ui
+  tag: latest
 
 app:
   endpoints:
-    catalog: http://catalog.catalog.svc:80
-    carts: http://carts.carts.svc:80
-    orders: http://orders.orders.svc:80
-    checkout: http://checkout.checkout.svc:80
+    # All requests go through the proxies layer
+    catalog:  http://proxies.default.svc.cluster.local:80/catalog
+    carts:    http://proxies.default.svc.cluster.local:80/cart
+    orders:   http://proxies.default.svc.cluster.local:80/orders
+    checkout: http://proxies.default.svc.cluster.local:80/checkout
 
-%{ if opentelemetry_enabled }
-opentelemetry:
-  enabled: true
-  instrumentation: ${opentelemetry_instrumentation}
-%{ endif }
-
-%{ if istio_enabled }
-istio:
-  enabled: true
-  hosts:
-  - "*"
-%{ else }
 service:
   type: LoadBalancer
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: external 
+    service.beta.kubernetes.io/aws-load-balancer-type: external
     service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
     service.beta.kubernetes.io/aws-load-balancer-attributes: "load_balancing.cross_zone.enabled=true"
-%{ endif }

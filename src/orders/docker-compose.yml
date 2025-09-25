@@ -24,7 +24,7 @@ services:
       - RETAIL_ORDERS_MESSAGING_PROVIDER=rabbitmq
       - RETAIL_ORDERS_MESSAGING_RABBITMQ_ADDRESSES=rabbitmq:5672
       - RETAIL_ORDERS_MESSAGING_RABBITMQ_USERNAME=rabbitmq
-      - RETAIL_ORDERS_MESSAGING_RABBITMQ_PASSWORD=${DB_PASSWORD}
+      - RETAIL_ORDERS_MESSAGING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}   # ✅ FIXED
     ports:
       - "8083:8080"
     depends_on:
@@ -45,7 +45,6 @@ services:
         - action: rebuild
           path: pom.xml
 
-  # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
   orders-db:
     image: postgres:16.1
     hostname: orders-db
@@ -65,7 +64,6 @@ services:
       timeout: 5s
       retries: 30
 
-  # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq
@@ -74,7 +72,7 @@ services:
       - no-new-privileges:true
     environment:
       - RABBITMQ_DEFAULT_USER=rabbitmq
-      - RABBITMQ_DEFAULT_PASS=${DB_PASSWORD}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}   # ✅ FIXED
     ports:
       - "61616:61616"
       - "8161:8161"

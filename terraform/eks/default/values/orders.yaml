@@ -1,35 +1,23 @@
 image:
-  repository: ${image_repository}
-  tag: ${image_tag}
+  repository: public.ecr.aws/aws-containers/retail-store-sample-orders
+  tag: latest
 
-%{ if opentelemetry_enabled }
 opentelemetry:
-  enabled: true
-  instrumentation: ${opentelemetry_instrumentation}
-%{ else }
-securityGroups:
-  create: true
+  enabled: false
 
-  securityGroupIds:
-  - ${security_group_id}
-%{ endif }
+securityGroups:
+  create: false
 
 app:
   persistence:
-    provider: 'postgres'
-    endpoint: '${database_endpoint_host}:${database_endpoint_port}'
-    database: '${database_name}'
+    provider: postgres
+    endpoint: "orders-db:5432"
+    username: orders_user
+    password: orders_pass
+    database: orders
 
-    secret:
-      username: ${database_username}
-      password: "${database_password}"
-
-  messaging:
-    provider: 'rabbitmq'
-
-    rabbitmq:
-      addresses: ["${rabbitmq_endpoint}"]
-
-      secret:
-        username: ${rabbitmq_username}
-        password: "${rabbitmq_password}"
+rabbitmq:
+  host: orders-rabbitmq
+  port: 5672
+  username: guest
+  password: guest

@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxies-config
+  namespace: default
+data:
+  default.conf: |
+    server {
+      listen 80;
+
+      # -------------------------
+      # Catalog proxy
+      # UI calls: /catalog/...
+      # Backend also uses /catalog/..., so just pass through
+      # -------------------------
+      location /catalog/ {
+        proxy_pass http://catalog.default.svc.cluster.local:80/catalog/;
+        proxy_set_header Accept "application/json";
+      }
+
+      # -------------------------
+      # Cart proxy
+      # UI calls: /cart/... (singular)
+      # Backend expects: /carts/... (plural)
+      # Rewrite /cart -> /carts
+      # -------------------------
+      location /cart/ {
+        rewrite ^/cart(.*)$ /carts$1 break;
+        proxy_pass http://cart-carts.default.svc.cluster.local:80;
+        proxy_set_header Accept "application/json";
+      }
+
+      # -------------------------
+      # Orders proxy
+      # UI calls: /orders
+      # Backend serves /orders (already aligned)
+      # -------------------------
+      location /orders {
+        proxy_pass http://orders.default.svc.cluster.local:80/orders;
+        proxy_set_header Accept "application/json";
+      }
+
+      # -------------------------
+      # Checkout proxy
+      # UI calls: /checkout/health
+      # Backend exposes only /health
+      # Rewrite /checkout/health -> /health
+      # -------------------------
+      location /checkout/health {
+        rewrite ^/checkout/health$ /health break;
+        proxy_pass http://checkout.default.svc.cluster.local:80;
+        proxy_set_header Accept "application/json";
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxies
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxies
+  template:
+    metadata:
+      labels:
+        app: proxies
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nginx/conf.d
+      volumes:
+      - name: config
+        configMap:
+          name: proxies-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxies
+  namespace: default
+spec:
+  selector:
+    app: proxies
+  ports:
+  - port: 80
+    targetPort: 80

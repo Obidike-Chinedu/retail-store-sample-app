@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-config
+  namespace: default
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://orders-db.cida0y04kg39.us-east-1.rds.amazonaws.com:5432/postgres
+  SPRING_DATASOURCE_USERNAME: ordersadmin
+  SPRING_DATASOURCE_PASSWORD: OrdersPass123!

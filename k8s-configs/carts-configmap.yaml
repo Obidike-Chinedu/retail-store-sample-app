@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: carts-config
+  namespace: default
+data:
+  DYNAMODB_TABLE_NAME: Carts

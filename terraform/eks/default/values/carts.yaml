@@ -1,19 +1,15 @@
 image:
-  repository: ${image_repository}
-  tag: ${image_tag}
+  repository: public.ecr.aws/aws-containers/retail-store-sample-cart
+  tag: latest
 
 serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: ${role_arn}
+  annotations: {}
 
-%{ if opentelemetry_enabled }
 opentelemetry:
-  enabled: true
-  instrumentation: ${opentelemetry_instrumentation}
-%{ endif }
+  enabled: false
 
 app:
   persistence:
     provider: dynamodb
     dynamodb:
-      tableName: ${table_name}
+      tableName: retail-cart-table
